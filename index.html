@@ -290,6 +290,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 const URL_P='https://docs.google.com/spreadsheets/d/e/2PACX-1vSguNShkVcViOBHGuETYM6U7mGoB_HCEYu5a91N6YT1voqbo0Yl-AmmF-dqZNLFmy5PhbIN0ZmKldfF/pub?gid=1788674038&single=true&output=csv';
 const URL_R='https://docs.google.com/spreadsheets/d/e/2PACX-1vSguNShkVcViOBHGuETYM6U7mGoB_HCEYu5a91N6YT1voqbo0Yl-AmmF-dqZNLFmy5PhbIN0ZmKldfF/pub?gid=1336764088&single=true&output=csv';
 const URL_L='https://docs.google.com/spreadsheets/d/e/2PACX-1vSguNShkVcViOBHGuETYM6U7mGoB_HCEYu5a91N6YT1voqbo0Yl-AmmF-dqZNLFmy5PhbIN0ZmKldfF/pub?gid=899426205&single=true&output=csv';
+const URL_H='https://docs.google.com/spreadsheets/d/e/2PACX-1vSguNShkVcViOBHGuETYM6U7mGoB_HCEYu5a91N6YT1voqbo0Yl-AmmF-dqZNLFmy5PhbIN0ZmKldfF/pub?gid=1658026287&single=true&output=csv';
 
 // Paleta de 22 colores distintos para todos los polleros
 const PAL=['#F5C842','#38AAFF','#00E676','#FF5252','#FF9800','#CE93D8','#80CBC4','#F48FB1',
@@ -312,7 +313,7 @@ const GRUPOS_DEF = {
   'L': ['Inglaterra','Croacia','Ghana','Panamá']
 };
 
-let S={pol:[],res:[],lpdw:[],hist:[],ok:false};
+let S={pol:[],res:[],lpdw:[],hist:{jornadas:[],polleros:[]},ok:false};
 let charts={},tabInit={};
 
 async function getCSV(u){
@@ -413,8 +414,10 @@ async function loadAll(refresh=false){
   if(!refresh) document.getElementById('ldr').style.display='block';
   document.getElementById('rtxt').textContent='Actualizando…';
   try{
-    const[pr,rr,lr]=await Promise.all([getCSV(URL_P),getCSV(URL_R),getCSV(URL_L)]);
-    S.pol=parsePolla(pr); S.res=parseRes(rr); S.lpdw=parseLpdw(lr); S.ok=true;
+    const[pr,rr,lr,hr]=await Promise.all([getCSV(URL_P),getCSV(URL_R),getCSV(URL_L),getCSV(URL_H).catch(()=>null)]);
+    S.pol=parsePolla(pr); S.res=parseRes(rr); S.lpdw=parseLpdw(lr);
+    if(hr) S.hist=parseHistorial(hr);
+    S.ok=true;
 
     const jug=S.res.filter(p=>p.jugado).length;
     const ptsJug=ptsMaxJugados();
@@ -519,28 +522,89 @@ function renderPodio(){
     </div>`).join('');
 }
 
-// ═══ RENDER BUMP CHART (posiciones) ═══
+// ═══ PARSE HISTORIAL ═══
+// Estructura: col A = Pollero, col B+ = P1, P2, P3...
+// Fila 1 = headers, fila 2+ = datos por pollero
+function parseHistorial(rows){
+  if(!rows||rows.length<2) return {jornadas:[],polleros:[]};
+  // Headers: ["Pollero","P1","P2","P3"...]
+  const headers=rows[0];
+  const jornadas=headers.slice(1).filter(h=>h&&h.toString().trim()!=='');
+  const polleros=[];
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i];
+    const name=(r[0]||'').toString().trim();
+    if(!name) continue;
+    // Puntos por jornada
+    const pts=jornadas.map((_,j)=>parseFloat(r[j+1])||0);
+    polleros.push({name,pts});
+  }
+  return {jornadas,polleros};
+}
+
+// ═══ CALCULAR POSICIONES DESDE HISTORIAL ═══
+// Para cada jornada, calcula el ranking denso de cada pollero
+function calcPosiciones(){
+  const {jornadas,polleros}=S.hist;
+  if(!polleros.length) return {jornadas:[],polleros:[]};
+  // Para cada jornada, calcular posición de cada pollero
+  const posiciones=polleros.map(p=>({name:p.name, pos:[]}));
+  jornadas.forEach((_,ji)=>{
+    const ptsFila=polleros.map(p=>p.pts[ji]||0);
+    const uniquePts=[...new Set(ptsFila)].sort((a,b)=>b-a);
+    polleros.forEach((p,pi)=>{
+      posiciones[pi].pos.push(uniquePts.indexOf(p.pts[ji])+1);
+    });
+  });
+  return {jornadas,polleros:posiciones};
+}
+
+// ═══ RENDER BUMP CHART ═══
 function renderBump(){
   destroyC('bump');
   const ctx=document.getElementById('bumpChart')?.getContext('2d');
   if(!ctx) return;
 
-  // Necesitamos historial de posiciones — si no hay, mostramos posición actual como punto único
-  const maxRank=S.pol.length;
-  const labels=['Actual'];
-  const datasets=S.pol.map((p,i)=>({
-    label:p.name,
-    data:[p.rank],
-    borderColor:PAL[i%PAL.length],
-    backgroundColor:PAL[i%PAL.length],
-    borderWidth:2,
-    pointRadius:5,
-    pointHoverRadius:7,
-    tension:.4,
-    fill:false
-  }));
+  const {jornadas,polleros}=calcPosiciones();
+  const nPolleros=S.pol.length||18;
 
-  const h=Math.max(300, S.pol.length*18);
+  // Si no hay historial todavía, mostrar posición actual como único punto
+  let labels, datasets;
+  if(!jornadas.length){
+    labels=['Actual'];
+    datasets=S.pol.map((p,i)=>({
+      label:p.name,
+      data:[p.rank],
+      borderColor:PAL[i%PAL.length],
+      backgroundColor:PAL[i%PAL.length],
+      borderWidth:2.5,
+      pointRadius:5,
+      pointHoverRadius:8,
+      tension:.4,
+      fill:false
+    }));
+  } else {
+    labels=jornadas;
+    // Crear mapa nombre→índice color consistente con S.pol
+    const colorMap={};
+    S.pol.forEach((p,i)=>colorMap[p.name]=i);
+    datasets=polleros.map(p=>{
+      const ci=colorMap[p.name]!==undefined?colorMap[p.name]:0;
+      return {
+        label:p.name,
+        data:p.pos,
+        borderColor:PAL[ci%PAL.length],
+        backgroundColor:PAL[ci%PAL.length],
+        borderWidth:2.5,
+        pointRadius:3,
+        pointHoverRadius:7,
+        tension:.4,
+        fill:false
+      };
+    });
+  }
+
+  const h=Math.max(360, nPolleros*22);
   document.getElementById('bumpChart').style.height=h+'px';
 
   charts.bump=new Chart(ctx,{
@@ -549,12 +613,18 @@ function renderBump(){
     options:{
       responsive:true,
       maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
       scales:{
         y:{
           reverse:true,
           min:1,
-          max:maxRank,
-          ticks:{stepSize:1,color:'#6B7A9F',font:{size:9}},
+          max:nPolleros,
+          ticks:{
+            stepSize:1,
+            color:'#6B7A9F',
+            font:{size:9},
+            callback:v=>Number.isInteger(v)?v:''
+          },
           grid:{color:'#1A2438'},
           title:{display:true,text:'Posición',color:'#6B7A9F',font:{size:9}}
         },
@@ -566,9 +636,13 @@ function renderBump(){
       plugins:{
         legend:{display:false},
         tooltip:{
-          backgroundColor:'#1A2438',borderColor:'#2A3554',borderWidth:1,
-          titleColor:'#F5C842',bodyColor:'#EEF2FF',
+          backgroundColor:'#1A2438',
+          borderColor:'#2A3554',
+          borderWidth:1,
+          titleColor:'#F5C842',
+          bodyColor:'#EEF2FF',
           callbacks:{
+            title:items=>`Actualización: ${items[0].label}`,
             label:d=>`${d.dataset.label}: pos. ${d.raw}`
           }
         }
@@ -576,11 +650,11 @@ function renderBump(){
     }
   });
 
-  // Leyenda todos los polleros
+  // Leyenda todos los polleros con posición actual
   document.getElementById('bump-leg').innerHTML=S.pol.map((p,i)=>`
     <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mu)">
       <span style="width:10px;height:10px;border-radius:50%;background:${PAL[i%PAL.length]};display:inline-block;flex-shrink:0"></span>
-      ${p.name}
+      <span>${p.name} <span style="color:var(--gold)">pos.${p.rank}</span></span>
     </span>`).join('');
 }
 
