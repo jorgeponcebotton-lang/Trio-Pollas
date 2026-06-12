@@ -514,11 +514,15 @@ function renderPodio(){
     </div>`;
   }).join('');
 
-  document.getElementById('gapb').innerHTML=P.map((p,i)=>`
+  const rankColorsPod={};
+  const uniqueRanksPod=[...new Set(P.map(p=>p.rank))].sort((a,b)=>a-b);
+  uniqueRanksPod.forEach((r,i)=>{ rankColorsPod[r]=PAL[i%PAL.length]; });
+
+  document.getElementById('gapb').innerHTML=P.map(p=>`
     <div class="gr">
       <div class="gnm">${p.name}</div>
-      <div class="gbg"><div class="gfl" style="width:${ldr>0?Math.round(p.pts/ldr*100):0}%;background:${PAL[i%PAL.length]}"></div></div>
-      <div class="gpt" style="color:${PAL[i%PAL.length]}">${p.pts}</div>
+      <div class="gbg"><div class="gfl" style="width:${ldr>0?Math.round(p.pts/ldr*100):0}%;background:${rankColorsPod[p.rank]}"></div></div>
+      <div class="gpt" style="color:${rankColorsPod[p.rank]}">${p.pts}</div>
     </div>`).join('');
 }
 
@@ -756,20 +760,28 @@ function renderStats(){
 
   destroyC('dc');
   const dCtx=document.getElementById('dchart')?.getContext('2d');
+  // Colores por rank: mismo rank = mismo color
+  const rankColorsD={};
+  const uniqueRanksD=[...new Set(P.map(p=>p.rank))].sort((a,b)=>a-b);
+  uniqueRanksD.forEach((r,i)=>{ rankColorsD[r]=PAL[i%PAL.length]; });
   if(dCtx) charts.dc=new Chart(dCtx,{type:'bar',
     data:{labels:P.map(p=>p.name),datasets:[{data:P.map(p=>p.pts),
-      backgroundColor:P.map((_,i)=>PAL[i%PAL.length]),borderRadius:3}]},
+      backgroundColor:P.map(p=>rankColorsD[p.rank]),borderRadius:3}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
       scales:{x:{grid:{color:'transparent'},ticks:{color:'#6B7A9F',font:{size:8}}},
               y:{grid:{color:'#1A2438'},ticks:{color:'#6B7A9F',font:{size:9}}}}}});
 
   destroyC('ec');
   const srt=[...P].sort((a,b)=>b.pts-a.pts);
+  // Colores por rank: mismo rank = mismo color
+  const rankColors={};
+  const uniqueRanksEc=[...new Set(srt.map(p=>p.rank))].sort((a,b)=>a-b);
+  uniqueRanksEc.forEach((r,i)=>{ rankColors[r]=PAL[i%PAL.length]; });
   const eCtx=document.getElementById('echart')?.getContext('2d');
   if(eCtx) charts.ec=new Chart(eCtx,{type:'bar',
     data:{labels:srt.map(p=>p.name),datasets:[{
       data:srt.map(p=>ptsJug>0?Math.round(p.pts/ptsJug*100):0),
-      backgroundColor:srt.map((_,i)=>i<3?'#F5C842':'#2A3554'),borderRadius:2}]},
+      backgroundColor:srt.map(p=>rankColors[p.rank]),borderRadius:2}]},
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false}},
       scales:{x:{grid:{color:'#1A2438'},ticks:{color:'#6B7A9F',font:{size:9}}},
