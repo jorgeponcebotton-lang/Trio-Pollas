@@ -125,6 +125,12 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 .pron-bet.fallo{color:var(--mu)}
 .pron-bet.vacio{color:var(--mu);font-size:11px;font-family:'Barlow Condensed'}
 .pron-empty{text-align:center;padding:30px;color:var(--mu);font-size:12px;font-family:'Barlow Condensed';letter-spacing:1px}
+.pron-group{background:var(--bg2);border:1px solid var(--br);border-radius:6px;overflow:hidden}
+.pron-group-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:var(--bg3);border-bottom:1px solid var(--br)}
+.pron-group-count{font-size:10px;color:var(--mu);letter-spacing:.5px;text-transform:uppercase}
+.pron-group-names{display:flex;flex-wrap:wrap;gap:0}
+.pron-group-names .pron-item{flex:1 1 auto;min-width:110px;background:transparent;border:none;border-radius:0;border-bottom:1px solid var(--br);padding:8px 14px}
+.pron-group-names .pron-item:last-child{border-bottom:none}
 /* GRUPOS */
 .grupos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .grupo-card{background:var(--bg2);border:1px solid var(--br);border-radius:6px;overflow:hidden}
@@ -943,28 +949,66 @@ function renderPronosticoDetalle(){
   </div>`;
 
   const nombres=Object.keys(p.apuestas);
-  let lista=nombres.map(nom=>{
+
+  // Agrupar por resultado exacto
+  const grupos={}; // "2-1" -> [nombres]
+  const sinApuesta=[];
+  nombres.forEach(nom=>{
     const apuesta=p.apuestas[nom];
-    if(!apuesta||apuesta==='–'||apuesta==='-'){
-      return `<div class="pron-item"><div class="pron-name">${nom}</div><div class="pron-bet vacio">Sin apuesta</div></div>`;
-    }
-    let cls='fallo';
-    if(jugado){
-      const m=apuesta.match(/(\d+)-(\d+)/);
-      if(m){
-        const gl=parseInt(m[1]), gv=parseInt(m[2]);
-        if(gl===r.gl&&gv===r.gv) cls='exacto';
-        else {
-          const ganadorReal=r.gl>r.gv?'L':r.gl<r.gv?'V':'E';
-          const ganadorApuesta=gl>gv?'L':gl<gv?'V':'E';
-          if(ganadorReal===ganadorApuesta) cls='ganador';
-        }
-      }
-    } else {
-      cls='vacio';
-    }
-    return `<div class="pron-item"><div class="pron-name">${nom}</div><div class="pron-bet ${cls}">${apuesta}</div></div>`;
+    if(!apuesta||apuesta==='–'||apuesta==='-'){ sinApuesta.push(nom); return; }
+    if(!grupos[apuesta]) grupos[apuesta]=[];
+    grupos[apuesta].push(nom);
+  });
+
+  // Ordenar resultados: diferencia de gol local-visita desc, luego por gl desc
+  const resultados=Object.keys(grupos).sort((a,b)=>{
+    const ma=a.match(/(\d+)-(\d+)/), mb=b.match(/(\d+)-(\d+)/);
+    if(!ma||!mb) return 0;
+    const [, alS, avS]=ma, [, blS, bvS]=mb;
+    const al=parseInt(alS), av=parseInt(avS), bl=parseInt(blS), bv=parseInt(bvS);
+    const da=al-av, db=bl-bv; // diferencia de gol
+    if(db!==da) return db-da; // mayor diferencia local primero
+    return bl-al; // a igual diferencia, más goles primero (más contundente)
+  });
+
+  function claseApuesta(apuesta){
+    if(!jugado) return 'vacio';
+    const m=apuesta.match(/(\d+)-(\d+)/);
+    if(!m) return 'fallo';
+    const gl=parseInt(m[1]), gv=parseInt(m[2]);
+    if(gl===r.gl&&gv===r.gv) return 'exacto';
+    const ganadorReal=r.gl>r.gv?'L':r.gl<r.gv?'V':'E';
+    const ganadorApuesta=gl>gv?'L':gl<gv?'V':'E';
+    return ganadorReal===ganadorApuesta?'ganador':'fallo';
+  }
+
+  let lista=resultados.map(res=>{
+    const integrantes=grupos[res];
+    const cls=claseApuesta(res);
+    const itemsHtml=integrantes.map(nom=>
+      `<div class="pron-item"><div class="pron-name">${nom}</div></div>`
+    ).join('');
+    return `<div class="pron-group">
+      <div class="pron-group-header">
+        <span class="pron-bet ${cls}">${res}</span>
+        <span class="pron-group-count">${integrantes.length} pollero${integrantes.length>1?'s':''}</span>
+      </div>
+      <div class="pron-group-names">${itemsHtml}</div>
+    </div>`;
   }).join('');
+
+  if(sinApuesta.length){
+    const itemsHtml=sinApuesta.map(nom=>
+      `<div class="pron-item"><div class="pron-name">${nom}</div></div>`
+    ).join('');
+    lista+=`<div class="pron-group">
+      <div class="pron-group-header">
+        <span class="pron-bet vacio">Sin apuesta</span>
+        <span class="pron-group-count">${sinApuesta.length}</span>
+      </div>
+      <div class="pron-group-names">${itemsHtml}</div>
+    </div>`;
+  }
 
   det.innerHTML=header+`<div class="pron-list">${lista}</div>`;
 }
