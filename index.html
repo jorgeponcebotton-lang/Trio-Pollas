@@ -107,6 +107,24 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 .sb{background:var(--bg2);border:1px solid var(--br);border-radius:6px;padding:11px 12px}
 .sv{font-family:'Bebas Neue';font-size:24px;line-height:1}.sv.g{color:var(--gold)}
 .sl2{font-size:9px;color:var(--mu);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+/* PRONOSTICOS */
+.pron-selector{margin-bottom:14px}
+.pron-selector select{width:100%;background:var(--bg2);border:1px solid var(--br);border-radius:6px;color:var(--text);font-family:'Barlow Condensed';font-size:14px;font-weight:700;padding:12px 14px;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23F5C842' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.pron-selector select:focus{outline:none;border-color:var(--g2)}
+.pron-header{background:var(--bg2);border:1px solid var(--br);border-radius:6px;padding:14px 16px;margin-bottom:12px;text-align:center}
+.pron-vs{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:6px}
+.pron-team{font-family:'Barlow Condensed';font-size:17px;font-weight:700}
+.pron-real{font-family:'Bebas Neue';font-size:26px;color:var(--gold)}
+.pron-meta{font-size:10px;color:var(--mu);letter-spacing:1px;text-transform:uppercase}
+.pron-list{display:flex;flex-direction:column;gap:6px}
+.pron-item{background:var(--bg2);border:1px solid var(--br);border-radius:6px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pron-name{font-family:'Barlow Condensed';font-size:14px;font-weight:700}
+.pron-bet{font-family:'Bebas Neue';font-size:18px;letter-spacing:1px;padding:3px 12px;border-radius:4px;background:var(--bg4);min-width:54px;text-align:center}
+.pron-bet.exacto{background:rgba(0,230,118,.15);color:var(--up);border:1px solid rgba(0,230,118,.4)}
+.pron-bet.ganador{background:rgba(245,200,66,.12);color:var(--gold);border:1px solid rgba(245,200,66,.3)}
+.pron-bet.fallo{color:var(--mu)}
+.pron-bet.vacio{color:var(--mu);font-size:11px;font-family:'Barlow Condensed'}
+.pron-empty{text-align:center;padding:30px;color:var(--mu);font-size:12px;font-family:'Barlow Condensed';letter-spacing:1px}
 /* GRUPOS */
 .grupos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .grupo-card{background:var(--bg2);border:1px solid var(--br);border-radius:6px;overflow:hidden}
@@ -138,8 +156,9 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 .ubtn:hover{background:var(--bg4)}
 @media(max-width:600px){
   .htitle{font-size:28px}.hstats{gap:8px}.hsv{font-size:20px}
-  .rkh,.rkr{grid-template-columns:34px 1fr 48px 0 48px 60px}
+  .rkh,.rkr{grid-template-columns:32px 1fr 46px 50px}
   .rkh>span:nth-child(4),.rkr>.rd{display:none}
+  .rkh>span:nth-child(6),.rkr>.re{display:none}
   .podg{grid-template-columns:1fr}.cg2{grid-template-columns:1fr}.fw{grid-column:1}
   .grupos-grid{grid-template-columns:1fr}
   .ss{grid-template-columns:1fr 1fr}
@@ -172,13 +191,13 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
     </div>
   </div>
   <div class="phstrip" id="phstrip">
-    <div class="ph act"><div class="phn">Grupos J1-J2</div><div class="php">144</div><div class="phd"></div></div>
-    <div class="ph"><div class="phn">Grupos J3</div><div class="php">156</div><div class="phd"></div></div>
-    <div class="ph"><div class="phn">1/16 avos</div><div class="php">69</div><div class="phd"></div></div>
-    <div class="ph"><div class="phn">Octavos</div><div class="php">36</div><div class="phd"></div></div>
-    <div class="ph"><div class="phn">Cuartos</div><div class="php">24</div><div class="phd"></div></div>
-    <div class="ph"><div class="phn">Semis</div><div class="php">9</div><div class="phd"></div></div><div class="ph"><div class="phn">3°/4° + Final</div><div class="php">15</div><div class="phd"></div></div>
-    
+    <div class="ph" id="ph-g12"><div class="phn">Grupos J1-J2</div><div class="php" id="ph-g12-pts">144</div><div class="phd"></div></div>
+    <div class="ph" id="ph-g3"><div class="phn">Grupos J3</div><div class="php" id="ph-g3-pts">156</div><div class="phd"></div></div>
+    <div class="ph" id="ph-r32"><div class="phn">1/16 avos</div><div class="php" id="ph-r32-pts">69</div><div class="phd"></div></div>
+    <div class="ph" id="ph-oct"><div class="phn">Octavos</div><div class="php" id="ph-oct-pts">36</div><div class="phd"></div></div>
+    <div class="ph" id="ph-cua"><div class="phn">Cuartos</div><div class="php" id="ph-cua-pts">24</div><div class="phd"></div></div>
+    <div class="ph" id="ph-sem"><div class="phn">Semis</div><div class="php" id="ph-sem-pts">9</div><div class="phd"></div></div>
+    <div class="ph" id="ph-fin"><div class="phn">3°/4° + Final</div><div class="php" id="ph-fin-pts">15</div><div class="phd"></div></div>
   </div>
 </div>
 
@@ -194,6 +213,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
   <button class="tab" onclick="goTab('posiciones',this)">Posiciones</button>
   <button class="tab" onclick="goTab('grupos',this)">Grupos</button>
   <button class="tab" onclick="goTab('fixture',this)">Fixture</button>
+  <button class="tab" onclick="goTab('pronosticos',this)">Pronósticos</button>
   <button class="tab" onclick="goTab('stats',this)">Stats</button>
 </div>
 
@@ -268,6 +288,15 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
     </div>
   </div>
 
+  <!-- PRONÓSTICOS -->
+  <div id="tab-pronosticos" class="sec">
+    <div class="sl">Pronósticos por partido · qué apostó cada pollero</div>
+    <div class="pron-selector">
+      <select id="pron-select" onchange="renderPronosticoDetalle()"></select>
+    </div>
+    <div id="pron-detalle" class="pron-detalle"></div>
+  </div>
+
   <!-- STATS -->
   <div id="tab-stats" class="sec">
     <div class="ss">
@@ -291,6 +320,7 @@ const URL_P='https://docs.google.com/spreadsheets/d/e/2PACX-1vSguNShkVcViOBHGuET
 const URL_R='https://docs.google.com/spreadsheets/d/e/2PACX-1vSguNShkVcViOBHGuETYM6U7mGoB_HCEYu5a91N6YT1voqbo0Yl-AmmF-dqZNLFmy5PhbIN0ZmKldfF/pub?gid=1336764088&single=true&output=csv';
 const URL_L='https://docs.google.com/spreadsheets/d/e/2PACX-1vSguNShkVcViOBHGuETYM6U7mGoB_HCEYu5a91N6YT1voqbo0Yl-AmmF-dqZNLFmy5PhbIN0ZmKldfF/pub?gid=899426205&single=true&output=csv';
 const URL_H='https://docs.google.com/spreadsheets/d/e/2PACX-1vSguNShkVcViOBHGuETYM6U7mGoB_HCEYu5a91N6YT1voqbo0Yl-AmmF-dqZNLFmy5PhbIN0ZmKldfF/pub?gid=1658026287&single=true&output=csv';
+const URL_AP='https://docs.google.com/spreadsheets/d/e/2PACX-1vSguNShkVcViOBHGuETYM6U7mGoB_HCEYu5a91N6YT1voqbo0Yl-AmmF-dqZNLFmy5PhbIN0ZmKldfF/pub?gid=1559440232&single=true&output=csv';
 
 // Paleta de 22 colores distintos para todos los polleros
 const PAL=['#F5C842','#38AAFF','#00E676','#FF5252','#FF9800','#CE93D8','#80CBC4','#F48FB1',
@@ -313,7 +343,7 @@ const GRUPOS_DEF = {
   'L': ['Inglaterra','Croacia','Ghana','Panamá']
 };
 
-let S={pol:[],res:[],lpdw:[],hist:{jornadas:[],polleros:[]},ok:false};
+let S={pol:[],res:[],lpdw:[],hist:{jornadas:[],polleros:[]},apuestas:[],ok:false};
 let charts={},tabInit={};
 
 async function getCSV(u){
@@ -387,6 +417,39 @@ function ptsMaxJugados(){
   return S.res.filter(p=>p.jugado).reduce((s,p)=>s+3*p.mult,0);
 }
 
+// Rangos de partidos N° por fase, y puntos totales de cada fase
+const FASES=[
+  {id:'g12', ini:1,  fin:48,  total:144},
+  {id:'g3',  ini:49, fin:72,  total:156},
+  {id:'r32', ini:73, fin:88,  total:69},
+  {id:'oct', ini:89, fin:96,  total:36},
+  {id:'cua', ini:97, fin:100, total:24},
+  {id:'sem', ini:101,fin:102, total:9},
+  {id:'fin', ini:103,fin:104, total:15}
+];
+
+// Actualiza la barra de fases mostrando saldo restante por jugar
+function actualizarFases(){
+  let faseActivaEncontrada=false;
+  FASES.forEach(f=>{
+    const partidosFase=S.res.filter(p=>p.n>=f.ini&&p.n<=f.fin);
+    const jugadosFase=partidosFase.filter(p=>p.jugado);
+    const ptsJugadosFase=jugadosFase.reduce((s,p)=>s+3*p.mult,0);
+    const saldo=f.total-ptsJugadosFase;
+    const completa=jugadosFase.length===partidosFase.length;
+    const elPh=document.getElementById('ph-'+f.id);
+    const elPts=document.getElementById('ph-'+f.id+'-pts');
+    if(!elPh||!elPts) return;
+    elPts.textContent=saldo;
+    elPh.classList.remove('act','done');
+    if(completa){
+      elPh.classList.add('done');
+    } else if(jugadosFase.length>0 || !faseActivaEncontrada){
+      if(!faseActivaEncontrada){ elPh.classList.add('act'); faseActivaEncontrada=true; }
+    }
+  });
+}
+
 // Calcular tablas de grupos desde resultados
 function calcularGrupos(){
   const tablas={};
@@ -414,9 +477,10 @@ async function loadAll(refresh=false){
   if(!refresh) document.getElementById('ldr').style.display='block';
   document.getElementById('rtxt').textContent='Actualizando…';
   try{
-    const[pr,rr,lr,hr]=await Promise.all([getCSV(URL_P),getCSV(URL_R),getCSV(URL_L),getCSV(URL_H).catch(()=>null)]);
+    const[pr,rr,lr,hr,ar]=await Promise.all([getCSV(URL_P),getCSV(URL_R),getCSV(URL_L),getCSV(URL_H).catch(()=>null),getCSV(URL_AP).catch(()=>null)]);
     S.pol=parsePolla(pr); S.res=parseRes(rr); S.lpdw=parseLpdw(lr);
     if(hr) S.hist=parseHistorial(hr);
+    if(ar) S.apuestas=parseApuestas(ar);
     S.ok=true;
 
     const jug=S.res.filter(p=>p.jugado).length;
@@ -427,6 +491,7 @@ async function loadAll(refresh=false){
     document.getElementById('hjugados-pts').textContent=ptsJug;
     document.getElementById('hporfj').textContent=ptsPorJug;
     document.getElementById('hp').textContent=S.pol.length||18;
+    actualizarFases();
     const l=S.pol[0];
     // Puntero: todos los que tengan los mismos pts que el líder
     if(l){
@@ -524,6 +589,37 @@ function renderPodio(){
       <div class="gbg"><div class="gfl" style="width:${ldr>0?Math.round(p.pts/ldr*100):0}%;background:${rankColorsPod[p.rank]}"></div></div>
       <div class="gpt" style="color:${rankColorsPod[p.rank]}">${p.pts}</div>
     </div>`).join('');
+}
+
+// ═══ PARSE APUESTAS + RESUMEN ═══
+// Estructura: N°,Día,Fecha,Hora,Mult,Local,Visita,Fase/Grupo,[18 cols apuestas]...
+function parseApuestas(rows){
+  let hi=-1;
+  for(let i=0;i<rows.length;i++) if(rows[i][0]==='N°'){hi=i;break;}
+  if(hi<0) return [];
+  const headers=rows[hi];
+  // Columnas de polleros: desde índice 8 hasta donde empiece "# Local"
+  let endIdx=headers.length;
+  for(let i=8;i<headers.length;i++){
+    if((headers[i]||'').toString().trim().startsWith('#')){ endIdx=i; break; }
+  }
+  const nombresPolleros=headers.slice(8,endIdx);
+  const out=[];
+  for(let i=hi+1;i<rows.length;i++){
+    const r=rows[i];
+    const n=parseInt(r[0]);
+    if(!n) continue; // saltar filas separadoras de grupo (ej "   Grupos – G.A")
+    const apuestas={};
+    nombresPolleros.forEach((nom,idx)=>{
+      apuestas[nom]=(r[8+idx]||'').toString().trim();
+    });
+    out.push({
+      n, dia:r[1]||'', fecha:r[2]||'', hora:r[3]||'',
+      mult:r[4]||'', local:r[5]||'', visita:r[6]||'',
+      fase:r[7]||'', apuestas
+    });
+  }
+  return out;
 }
 
 // ═══ PARSE HISTORIAL ═══
@@ -799,6 +895,80 @@ function renderStats(){
                  max:Math.max(6,...(wv.map(p=>p.votes)||[0]))+1}}}});
 }
 
+// ═══ RENDER PRONÓSTICOS ═══
+function renderPronosticos(){
+  const sel=document.getElementById('pron-select');
+  if(!S.apuestas.length){
+    sel.innerHTML='<option>Sin datos de pronósticos</option>';
+    document.getElementById('pron-detalle').innerHTML='<div class="pron-empty">No se encontraron pronósticos en el Sheet</div>';
+    return;
+  }
+  // Agrupar opciones por fase para el selector
+  let lastFase='';
+  sel.innerHTML=S.apuestas.map(p=>{
+    const jugadoTag=p_jugado(p)?' ✓':'';
+    return `<option value="${p.n}">${p.n}. ${p.local} vs ${p.visita}${jugadoTag}</option>`;
+  }).join('');
+
+  // Seleccionar por defecto: el último partido jugado, o el primero
+  const jugados=S.apuestas.filter(p=>p_jugado(p));
+  const def=jugados.length?jugados[jugados.length-1].n:S.apuestas[0].n;
+  sel.value=def;
+  renderPronosticoDetalle();
+}
+
+function p_jugado(p){
+  const r=S.res.find(x=>x.n===p.n);
+  return r&&r.jugado;
+}
+
+function renderPronosticoDetalle(){
+  const sel=document.getElementById('pron-select');
+  const n=parseInt(sel.value);
+  const p=S.apuestas.find(x=>x.n===n);
+  const det=document.getElementById('pron-detalle');
+  if(!p){ det.innerHTML='<div class="pron-empty">Selecciona un partido</div>'; return; }
+
+  const r=S.res.find(x=>x.n===n);
+  const jugado=r&&r.jugado;
+  const realStr=jugado?`${r.gl}-${r.gv}`:'Por jugar';
+
+  let header=`<div class="pron-header">
+    <div class="pron-vs">
+      <span class="pron-team">${p.local}</span>
+      <span class="pron-real">${realStr}</span>
+      <span class="pron-team">${p.visita}</span>
+    </div>
+    <div class="pron-meta">${p.fase} · ${p.fecha} ${p.hora} · ${p.mult}</div>
+  </div>`;
+
+  const nombres=Object.keys(p.apuestas);
+  let lista=nombres.map(nom=>{
+    const apuesta=p.apuestas[nom];
+    if(!apuesta||apuesta==='–'||apuesta==='-'){
+      return `<div class="pron-item"><div class="pron-name">${nom}</div><div class="pron-bet vacio">Sin apuesta</div></div>`;
+    }
+    let cls='fallo';
+    if(jugado){
+      const m=apuesta.match(/(\d+)-(\d+)/);
+      if(m){
+        const gl=parseInt(m[1]), gv=parseInt(m[2]);
+        if(gl===r.gl&&gv===r.gv) cls='exacto';
+        else {
+          const ganadorReal=r.gl>r.gv?'L':r.gl<r.gv?'V':'E';
+          const ganadorApuesta=gl>gv?'L':gl<gv?'V':'E';
+          if(ganadorReal===ganadorApuesta) cls='ganador';
+        }
+      }
+    } else {
+      cls='vacio';
+    }
+    return `<div class="pron-item"><div class="pron-name">${nom}</div><div class="pron-bet ${cls}">${apuesta}</div></div>`;
+  }).join('');
+
+  det.innerHTML=header+`<div class="pron-list">${lista}</div>`;
+}
+
 function destroyC(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 
 function renderTab(id){
@@ -806,6 +976,7 @@ function renderTab(id){
   if(id==='posiciones'){renderBump();renderTrend();}
   if(id==='grupos') renderGrupos();
   if(id==='fixture') renderFixture();
+  if(id==='pronosticos') renderPronosticos();
   if(id==='stats') renderStats();
   tabInit[id]=true;
 }
